@@ -41,6 +41,8 @@ const (
 	WorkerAnalyticsEngineBindingType WorkerBindingType = "analytics_engine"
 	// WorkerQueueBindingType is the type for queue bindings.
 	WorkerQueueBindingType WorkerBindingType = "queue"
+	// WorkerDispatcherBindingType is the type for dispatcher bindings.
+	WorkerDispatcherBindingType WorkerBindingType = "dispatcher"
 )
 
 type ListWorkerBindingsParams struct {
@@ -336,6 +338,32 @@ func (b WorkerQueueBinding) serialize(bindingName string) (workerBindingMeta, wo
 		"type":       b.Type(),
 		"name":       b.Binding,
 		"queue_name": b.Queue,
+	}, nil, nil
+}
+
+// WorkerDispatcherBindingType is a binding to a Workers Dispatcher.
+//
+// https://developers.cloudflare.com/cloudflare-for-platforms/workers-for-platforms/get-started/configuration/
+type WorkerDispatcherBindingType struct {
+	Text string
+}
+
+// Type returns the type of the binding.
+func (b WorkerDispatcherBinding) Type() WorkerBindingType {
+	return WorkerDispatcherBindingType
+}
+
+func (b WorkerDispatcherBinding) serialize(bindingName string) (workerBindingMeta, workerBindingBodyWriter, error) {
+	if b.Binding == "" {
+		return nil, nil, fmt.Errorf(`Binding name for binding "%s" cannot be empty`, bindingName)
+	}
+	if b.Queue == "" {
+		return nil, nil, fmt.Errorf(`Queue name for binding "%s" cannot be empty`, bindingName)
+	}
+
+	return workerBindingMeta{
+		"name":       bindingName,
+		"type":       b.Type()
 	}, nil, nil
 }
 
